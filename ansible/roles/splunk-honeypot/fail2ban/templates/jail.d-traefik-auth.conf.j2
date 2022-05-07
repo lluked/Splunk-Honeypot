@@ -1,0 +1,10 @@
+# /etc/fail2ban/jail.d/traefik.conf
+[traefik-auth]
+enabled = true
+port = http,https
+filter = traefik-auth
+logpath = {{ project_install_directory }}/log/traefik/access.log
+maxretry = 5
+findtime = 300
+bantime = 1200
+banaction = iptables-new

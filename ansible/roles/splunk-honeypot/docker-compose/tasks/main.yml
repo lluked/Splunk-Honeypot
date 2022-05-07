@@ -1,0 +1,106 @@
+---
+
+- name: Install python3-pip, to install passlib used by ansible htpasswd
+  ansible.builtin.apt:
+    name: ['python3-pip']
+    state: present
+    update_cache: yes
+  become: true
+
+- name: Install passlib
+  ansible.builtin.pip:
+    name: ['passlib']
+
+- name: Create splunk-honeypot directory
+  ansible.builtin.file:
+    path: "{{ project_install_directory }}"
+    state: directory
+    owner: 1000
+    group: 1000
+    mode: '0755'
+  become: true
+
+- name: Create splunk-honeypot subdirectories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: 1000
+    group: 1000
+    mode: '0755'
+  loop:
+    - "{{ project_install_directory }}/data"
+    - "{{ project_install_directory }}/data/honeypot"
+    - "{{ project_install_directory }}/data/honeypot/cowrie"
+    - "{{ project_install_directory }}/data/honeypot/cowrie/dl"
+    - "{{ project_install_directory }}/data/honeypot/cowrie/etc"
+    - "{{ project_install_directory }}/data/honeypot/cowrie/tty"
+    - "{{ project_install_directory }}/data/elasticsearch"
+    - "{{ project_install_directory }}/docker"
+    - "{{ project_install_directory }}/log"
+    - "{{ project_install_directory }}/log/traefik"
+    - "{{ project_install_directory }}/log/honeypot"
+    - "{{ project_install_directory }}/log/honeypot/cowrie"
+
+- name: Copy files to docker subdirectory
+  ansible.builtin.copy:
+    src: "files/"
+    dest: "{{ project_install_directory }}/docker/"
+    owner: 1000
+    group: 1000
+    mode: '0644'
+  become: true
+
+- name: Template traefik config files
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: 1000
+    group: 1000
+    mode: '0644'
+  with_items:
+    - { src: 'traefik.yml.j2', dest: "{{ project_install_directory }}/docker/traefik/traefik.yml" }
+    - { src: 'splunk_dynamic.yml.j2', dest: "{{ project_install_directory }}/docker/traefik/conf/splunk_dynamic.yml" }
+  become: true
+
+- name: Set traefik splunk proxy password
+  community.general.htpasswd:
+    path: "{{ project_install_directory }}/docker/traefik/conf/splunk.htpasswd"
+    name: splunk
+    password: "{{ traefik_splunk_proxy_password }}"
+    owner: 1000
+    group: 1000
+    mode: '0644'
+
+- name: Touch log files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: touch
+    owner: 1000
+    group: 1000
+    mode: '0644'
+  loop:
+    - '{{ project_install_directory }}/log/traefik/traefik.json'
+    - '{{ project_install_directory }}/log/traefik/access.log'
+    - '{{ project_install_directory }}/log/honeypot/cowrie/cowrie.json'
+
+- name: Template .env file
+  ansible.builtin.template:
+    src: .env.j2
+    dest: '{{ project_install_directory }}/docker/.env'
+    owner: 1000
+    group: 1000
+    mode: '700'
+
+- name: Copy docker-compose file
+  ansible.builtin.copy:
+    src: "files/docker-compose.yml"
+    dest: "{{ project_install_directory }}/docker/docker-compose.yml"
+    owner: 1000
+    group: 1000
+    mode: '700'
+
+- name: Get public ip and output to ip.env
+  ansible.builtin.script: scripts/get-publicip.sh
+  args:
+    chdir: '{{ project_install_directory }}'
+    creates: ip.env

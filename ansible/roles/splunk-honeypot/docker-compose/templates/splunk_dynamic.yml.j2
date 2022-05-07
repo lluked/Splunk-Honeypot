@@ -1,0 +1,28 @@
+# /etc/traefik/conf/splunk_dynamic.yml
+http:
+
+  routers:
+    splunk:
+      rule: PathPrefix(`/xyz`)
+      middlewares:
+        - splunk-auth
+      service: splunk-service
+      entryPoints:
+{% if traefik_tls == true %}
+        - websecure
+      tls: {}
+{% else %}
+        - web
+{% endif %}
+
+  middlewares:
+    splunk-auth:
+      basicAuth:
+        usersFile: etc/traefik/conf/splunk.htpasswd
+        removeHeader: true
+
+  services:
+    splunk-service:
+      loadBalancer:
+        servers:
+        - url: "http://splunk:8000"

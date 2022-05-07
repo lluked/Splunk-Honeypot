@@ -1,0 +1,29 @@
+---
+
+- name: Check if the defined ssh port is being used
+  ansible.builtin.wait_for:
+    port: "{{ ssh_port }}"
+    state: "started"
+    connect_timeout: "5"
+    timeout: "10"
+  delegate_to: "localhost"
+  ignore_errors: true
+  register: defined_ssh
+
+- name: If the defined port is reachable, set {{ ansible_port }} to defined port
+  ansible.builtin.set_fact:
+    ansible_port: "{{ ssh_port }}"
+  when: defined_ssh.failed == false
+
+- name: If the defined port is unreachable
+  block:
+    - name: Set {{ ansible_port }} to the default port
+      ansible.builtin.set_fact:
+        ansible_port: 22
+    - name: Change the ssh port to the defined port
+      ansible.builtin.lineinfile:
+        dest: "/etc/ssh/sshd_config"
+        regexp: "^Port"
+        line: "Port {{ ssh_port }}"
+  become: true
+  when: defined_ssh.failed == true

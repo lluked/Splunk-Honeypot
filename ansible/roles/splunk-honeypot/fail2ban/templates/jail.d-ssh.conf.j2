@@ -1,0 +1,10 @@
+# /etc/fail2ban/jail.d/ssh.conf
+[sshd]
+enabled = true
+port = {{ ssh_port }}
+filter = sshd
+logpath = /var/log/auth.log
+maxretry = 5
+findtime = 300
+bantime = 1200
+banaction = iptables-new

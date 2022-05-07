@@ -1,0 +1,30 @@
+---
+
+- hosts: all
+  gather_facts: no
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    # Install directory
+    project_install_directory: "/opt/splunk-honeypot"
+    # SSH
+    ssh_port: 22
+    # Cowrie
+    cowrie_ssh_port: 2222
+    cowrie_telnet_port: 2223
+    # Traefik
+    traefik_tls: false
+    traefik_splunk_proxy_password: changeme
+    # Splunk
+    splunk_password: changeme
+
+  pre_tasks:
+    - include_tasks: playbooks/update-upgrade.yml
+
+  roles:
+    - role: ansible_facts
+    - role: docker
+    - role: splunk-honeypot/docker-compose
+    - role: splunk-honeypot/fail2ban
+    - role: splunk-honeypot/logrotate.d
+    - role: splunk-honeypot/systemd
+    - role: ssh

@@ -1,0 +1,5 @@
+---
+
+# Docker Images
+traefik_version: "2.7"
+traefik_tls: true

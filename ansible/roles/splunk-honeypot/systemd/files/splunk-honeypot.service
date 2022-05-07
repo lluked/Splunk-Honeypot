@@ -1,0 +1,32 @@
+# /etc/systemd/system/splunk-honeypot.service
+
+[Unit]
+Description=splunk-honeypot
+Requires=docker.service
+After=docker.service
+
+[Service]
+Restart=always
+RestartSec=5
+TimeoutSec=infinity
+
+# Working directory
+WorkingDirectory=/opt/splunk-honeypot/docker
+
+# Before Start (Stop existing compose, remove old containers, networks and volumes. Pull and build and remove dangling images)
+ExecStartPre=-/usr/local/bin/docker-compose down -v
+ExecStartPre=-/usr/local/bin/docker-compose rm -v
+ExecStartPre=-/bin/bash -c 'docker network rm $(docker network ls -q)'
+ExecStartPre=-/bin/bash -c 'docker volume rm $(docker volume ls -q)'
+ExecStartPre=-/bin/bash -c 'docker rm -v $(docker ps -aq)'
+ExecStartPre=-/usr/local/bin/docker-compose pull
+ExecStartPre=-/bin/bash -c 'docker rmi $(docker images | grep "<none>" | awk \'{print $3}\')'
+
+# Start (Compose up)
+ExecStart=/usr/local/bin/docker-compose up --no-color
+
+# Stop (Compose down, remove volumes)
+ExecStop=/usr/local/bin/docker-compose down -v
+
+[Install]
+WantedBy=multi-user.target

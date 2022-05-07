@@ -1,0 +1,5 @@
+#cloud-config
+timezone: ${timezone}
+
+repo_update: true
+repo_upgrade: all

@@ -1,0 +1,45 @@
+---
+
+- name: Install fail2ban
+  ansible.builtin.apt:
+    name: fail2ban
+    state: present
+  become: true
+
+- name: Remove default fail2ban config
+  ansible.builtin.file:
+    path: /etc/fail2ban/jail.d/defaults-debian.conf
+    state: absent
+  become: true
+
+- name: Copy traefik-auth filter into place
+  ansible.builtin.copy:
+    src: files/filter.d-traefik-auth.conf
+    dest: /etc/fail2ban/filter.d/traefik-auth.conf
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+
+- name:  Template ssh jail into place
+  ansible.builtin.template:
+    src: jail.d-ssh.conf.j2
+    dest: /etc/fail2ban/jail.d/ssh.conf
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+
+- name:  Template traefik-auth jail into place
+  ansible.builtin.template:
+    src: jail.d-traefik-auth.conf.j2
+    dest: /etc/fail2ban/jail.d/traefik-auth.conf
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+
+- name: Reload fail2ban-client
+  ansible.builtin.shell:
+    cmd: fail2ban-client reload
+  become: true

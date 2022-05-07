@@ -1,0 +1,16 @@
+---
+
+- name: Install apache2-utils + pigz
+  ansible.builtin.apt:
+    name: ['apache2-utils', 'pigz']
+    state: present
+  become: true
+
+- name: Template logrotate config into place
+  ansible.builtin.template:
+    src: splunk-honeypot.j2
+    dest: /etc/logrotate.d/
+    owner: root
+    group: root
+    mode: '0644'
+  become: true

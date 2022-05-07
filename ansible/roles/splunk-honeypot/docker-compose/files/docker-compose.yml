@@ -1,0 +1,58 @@
+version: "2.2"
+
+services:
+
+  splunk:
+    image: splunk/splunk
+    restart: always
+    cap_add: ['IPC_LOCK']
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    environment:
+      SPLUNK_START_ARGS: "--accept-license"
+      SPLUNK_APPS_URL: https://github.com/lluked/cowrie-splunk-app/archive/main.tar.gz
+      SPLUNK_PASSWORD: $SPLUNK_PASSWORD
+    volumes:
+      - ${PROJECT_INSTALL_DIRECTORY}/docker/splunk/default.yml:/tmp/defaults/default.yml
+      - ${PROJECT_INSTALL_DIRECTORY}/log:/var/log:ro
+    networks:
+      - splunk
+
+  cowrie:
+    build:
+      context: "./honeypot/cowrie/"
+      dockerfile: Dockerfile
+    restart: always
+    volumes:
+      - ${PROJECT_INSTALL_DIRECTORY}/docker/honeypot/cowrie/etc/cowrie.cfg:/home/cowrie/cowrie-git/etc/cowrie.cfg:ro
+      - ${PROJECT_INSTALL_DIRECTORY}/docker/honeypot/cowrie/etc/userdb.txt:/home/cowrie/cowrie-git/etc/userdb.txt:ro
+      - ${PROJECT_INSTALL_DIRECTORY}/log/honeypot/cowrie/cowrie.json:/home/cowrie/cowrie-git/var/log/cowrie/cowrie.json
+      - ${PROJECT_INSTALL_DIRECTORY}/data/honeypot/cowrie/dl:/home/cowrie/cowrie-git/var/dl
+      - ${PROJECT_INSTALL_DIRECTORY}/data/honeypot/cowrie/tty:/home/cowrie/cowrie-git/var/tty
+    networks:
+      - cowrie
+    ports:
+      - ${COWRIE_SSH_PORT}:2222
+      - ${COWRIE_TELNET_PORT}:2223
+
+  traefik:
+    image: "traefik:${TRAEFIK_VERSION}"
+    restart: always
+    volumes:
+      - ${PROJECT_INSTALL_DIRECTORY}/docker/traefik/conf:/etc/traefik/conf:ro
+      - ${PROJECT_INSTALL_DIRECTORY}/docker/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ${PROJECT_INSTALL_DIRECTORY}/log/traefik:/var/log
+    networks:
+      - splunk
+    ports:
+      - "80:80"
+      - "443:443"
+
+networks:
+  splunk:
+  cowrie:

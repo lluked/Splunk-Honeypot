@@ -1,0 +1,14 @@
+splunk:
+  conf:
+    web:
+      directory: /opt/splunk/etc/system/local
+      content:
+        settings:
+          root_endpoint : /xyz
+    limits:
+      directory: /opt/splunk/etc/system/local
+      content:
+        kv:
+          limit : 400
+        search:
+          max_searches_per_cpu : 4

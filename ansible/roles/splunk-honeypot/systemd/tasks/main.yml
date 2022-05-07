@@ -1,0 +1,20 @@
+---
+
+- name: Copy splunk-honeypot.service into place
+  ansible.builtin.copy:
+    src: files/splunk-honeypot.service
+    dest: /etc/systemd/system/splunk-honeypot.service
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+
+- name: Reload systemctl daemons
+  ansible.builtin.shell:
+    cmd: systemctl daemon-reload
+  become: true
+
+- name: Enable splunk-honeypot systemctl daemon
+  ansible.builtin.shell:
+    cmd: systemctl enable splunk-honeypot
+  become: true
