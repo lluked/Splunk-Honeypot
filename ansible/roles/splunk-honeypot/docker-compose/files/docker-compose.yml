@@ -31,7 +31,7 @@ services:
     volumes:
       - ${PROJECT_INSTALL_DIRECTORY}/docker/honeypot/cowrie/etc/cowrie.cfg:/home/cowrie/cowrie-git/etc/cowrie.cfg:ro
       - ${PROJECT_INSTALL_DIRECTORY}/docker/honeypot/cowrie/etc/userdb.txt:/home/cowrie/cowrie-git/etc/userdb.txt:ro
-      - ${PROJECT_INSTALL_DIRECTORY}/log/honeypot/cowrie/cowrie.json:/home/cowrie/cowrie-git/var/log/cowrie/cowrie.json
+      - ${PROJECT_INSTALL_DIRECTORY}/log/honeypot/cowrie/:/home/cowrie/cowrie-git/var/log/cowrie/
       - ${PROJECT_INSTALL_DIRECTORY}/data/honeypot/cowrie/dl:/home/cowrie/cowrie-git/var/dl
       - ${PROJECT_INSTALL_DIRECTORY}/data/honeypot/cowrie/tty:/home/cowrie/cowrie-git/var/tty
     networks:
