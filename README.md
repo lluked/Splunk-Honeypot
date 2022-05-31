@@ -30,7 +30,7 @@ This is a project for deploying and monitoring an ssh honeypot. This project con
     traefik_splunk_proxy_password = "changeme"
     splunk_password = "changeme"
 ```
-traefik_splunk_proxy_password is for the proxy exposing Splunk to the web (this service id however limited to access from your IP only by default)
+traefik_splunk_proxy_password is for the proxy exposing Splunk to the web (this service is however limited to access from your IP only by default)
 - run `terraform apply`
     - SSH private and public keys are automatically created and outputted to "./keys/" in the relative terraform folder
     - Terraform deploys all infrastructure
