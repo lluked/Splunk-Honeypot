@@ -68,6 +68,6 @@ Vagrant deployment is largely the same as with Terraform but only creates the de
 ## Troubleshooting
 
   - Check progress by sshing into the instance
-    - Run 'sudo systemctl status manuka' to check the service status
+    - Run 'sudo systemctl status splunk-honeypot to check the service status
     - Run 'docker ps' to check docker status
     - Once 'docker ps' shows the Traefik container as running wait a couple of minutes.
